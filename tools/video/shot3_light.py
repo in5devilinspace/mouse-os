@@ -10,7 +10,10 @@ import math
 import subprocess
 import sys
 
-W, H, FPS, DUR = 1920, 1080, 30, 5
+import os as _os
+W = int(_os.environ.get("VW", "1920"))
+H = int(_os.environ.get("VH", "1080"))
+FPS, DUR = 30, 5
 N = FPS * DUR
 NAVY = (10, 14, 26)
 AMBER = (255, 180, 84)
