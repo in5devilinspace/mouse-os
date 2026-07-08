@@ -37,8 +37,10 @@ _STATE = {
 }
 
 
-def test_detect_screen_size_bounding_box_of_all_logical_monitors():
-    assert detect_screen_size(fetch=lambda: _STATE) == (7280, 1440)
+def test_detect_screen_size_is_the_primary_monitor():
+    # v1 uses the PRIMARY monitor (DP-2, index-4 flag True) — 3440x1440 —
+    # not the multi-monitor bounding box, so grid cells never land in a gap.
+    assert detect_screen_size(fetch=lambda: _STATE) == (3440, 1440)
 
 
 def test_detect_screen_size_none_on_dbus_failure():

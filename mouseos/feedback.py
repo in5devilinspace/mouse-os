@@ -24,6 +24,7 @@ PHRASES = {
     "goodbye": "goodbye",        # quitting
     "stopped": "stopped",        # stop with nothing held
     "reverted": "reverted",      # undo done
+    "okay": "okay",              # never-mind / cancel acknowledged
     "opening": "opening",        # camera command launched
     "practice": "practice mode", # dummy backend active
 }

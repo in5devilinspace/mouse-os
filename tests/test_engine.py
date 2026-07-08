@@ -217,11 +217,14 @@ def test_show_cameras_launches_configured_command(rig):
 
 
 def test_where_am_i_speaks_nearest_region(rig):
+    # Speaks a disjoint COMPASS word (not the command-grammar region name),
+    # so the mic hearing the answer can't self-issue a movement command.
     eng, pointer, fb, *_ = rig
     eng.handle(Wake())
     eng.handle(GoTo(region="top left"))
     eng.handle(WhereAmI())
-    assert "region:top left" in fb.spoken or "top left" in fb.spoken
+    assert "northwest" in fb.spoken
+    assert "top left" not in fb.spoken
 
 
 def test_move_to_absolute_and_percent(rig):

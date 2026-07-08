@@ -25,13 +25,33 @@ MODEL_DIR = Path("~/.cache/mouseos").expanduser()
 MODEL_NAME = "vosk-model-small-en-us-0.15"
 
 
-def run_pipeline(source, engine, apps):
-    """The whole product: utterances in, actions out."""
+def _steps_for(cfg):
+    """Map config [steps] (little/normal/lot) to parser magnitude phrases."""
+    s = cfg.get("steps", {}) if cfg else {}
+    return {
+        "": s.get("normal", 100),
+        "a little": s.get("little", 25),
+        "a lot": s.get("lot", 300),
+    }
+
+
+def run_pipeline(source, engine, apps, steps=None, on_error=None):
+    """The whole product: utterances in, actions out.
+
+    A handler exception must never strand a hands-free user, so each utterance
+    is isolated: on failure we report and keep listening.
+    """
     repl = getattr(source, "repl", False)
     for utterance in source:
-        intent = parser.parse(utterance, apps=apps, repl=repl)
-        engine.handle(intent)
-        if engine.done:
+        intent = parser.parse(utterance, apps=apps, repl=repl, steps=steps)
+        try:
+            engine.handle(intent)
+        except Exception as e:
+            if on_error:
+                on_error(e)
+            else:
+                raise
+        if getattr(engine, "done", False):
             break
 
 
@@ -40,10 +60,27 @@ def _launcher(cmd):
                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
+def _normalize_argv(argv):
+    """Make 'run' the default subcommand — even when only flags are given.
+
+    'mouseos' -> run; 'mouseos --input repl' -> run --input repl;
+    'mouseos doctor' -> doctor (a real subcommand is left alone).
+    """
+    subcommands = {"run", "doctor", "setup", "setup-model", "say", "grammar"}
+    argv = list(argv)
+    if not argv or argv[0] not in subcommands:
+        return ["run"] + argv
+    return argv
+
+
 def _resolve_screen(cfg, override=None):
-    spec = override or cfg.get("screen", "auto")
+    spec = override or (cfg.get("screen", "auto") if cfg else "auto")
     if spec and spec != "auto":
-        w, _, h = spec.partition("x")
+        w, sep, h = spec.partition("x")
+        if not sep or not w.strip().isdigit() or not h.strip().isdigit():
+            raise SystemExit(
+                f"mouse !! bad screen size {spec!r} — expected WIDTHxHEIGHT, "
+                f"e.g. --screen 1920x1080")
         return Screen(int(w), int(h))
     size = detect_screen_size()
     if size:
@@ -84,12 +121,25 @@ def _cmd_run(args):
         console.event(f"input: {input_mode} (auto)")
 
     if input_mode == "voice":
+        from .inputs.voice import pick_capture_cmd
         model_dir = MODEL_DIR / MODEL_NAME
         if not model_dir.is_dir():
             console.error("voice", "model missing — run: mouseos setup-model")
             return 1
+        if pick_capture_cmd() is None:
+            console.error("voice", "no microphone tool — "
+                          "sudo apt install pipewire-bin or alsa-utils "
+                          "(or use: mouseos run --input repl)")
+            return 1
+        last = {"state": None}
+
+        def show_state(state):
+            if state != last["state"]:
+                last["state"] = state
+                console.event(f"[mic: {state}]")
+
         source = VoskSource(model_dir, grammar.phrases(apps), mute_gate=gate,
-                            on_state=lambda s: None)
+                            on_state=show_state)
         console.event("listening (say 'mouse wake' to begin, "
                       "'mouse quit' then 'confirm quit' to exit)")
     else:
@@ -97,10 +147,19 @@ def _cmd_run(args):
         console.event("text mode — type commands "
                       "('mouse wake' to begin, 'help' for the list)")
 
+    steps = _steps_for(cfg)
     try:
-        run_pipeline(source, engine, apps)
+        run_pipeline(source, engine, apps, steps=steps,
+                     on_error=lambda e: feedback.error("internal", str(e)))
     except KeyboardInterrupt:
         console.event("interrupted")
+        return 0
+    # The source ended without the user quitting — the mic/pipe died. Say so;
+    # a hands-free user must never be left staring at a silently-exited agent.
+    if not engine.done:
+        feedback.error("input", "voice input stopped unexpectedly "
+                       "(microphone or capture process ended)")
+        return 1
     return 0
 
 
@@ -185,10 +244,9 @@ def main(argv=None):
     say_p.add_argument("utterance", nargs="+")
     sub.add_parser("grammar", help="print every phrase the agent understands")
 
+    argv = _normalize_argv(sys.argv[1:] if argv is None else argv)
     args = ap.parse_args(argv)
     cmd = args.cmd or "run"
-    if cmd == "run" and args.cmd is None:
-        args = ap.parse_args(["run"] + (argv or sys.argv[1:]))
     handler = {
         "run": _cmd_run, "doctor": _cmd_doctor, "setup": _cmd_setup,
         "setup-model": _cmd_setup_model, "say": _cmd_say,

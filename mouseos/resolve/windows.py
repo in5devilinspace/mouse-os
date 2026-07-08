@@ -39,10 +39,13 @@ def _current_mode_by_connector(monitors):
 
 
 def detect_screen_size(fetch=None):
-    """Desktop bounding box across ALL logical monitors (Mutter DisplayConfig).
+    """Effective size of the PRIMARY logical monitor (Mutter DisplayConfig).
 
-    Each logical monitor's pixel size comes from ITS OWN monitor's current
-    mode divided by its scale — never from another output's mode.
+    v1 operates on one monitor: grid cells and named regions must always land
+    on real pixels, so we use the primary monitor rather than the desktop
+    bounding box (which spans gaps between monitors of different heights —
+    dead zones where the cursor can never go). Multi-monitor targeting is a
+    roadmap item. Each monitor's pixel size is its own current mode / scale.
     """
     fetch = fetch or (lambda: _busctl([
         "org.gnome.Mutter.DisplayConfig",
@@ -54,20 +57,23 @@ def detect_screen_size(fetch=None):
         return None
     try:
         # GetCurrentState -> (serial, monitors, logical_monitors, properties)
+        # logical monitor: (x, y, scale, transform, primary, [monitors], props)
         monitors, logical = reply["data"][1], reply["data"][2]
         modes = _current_mode_by_connector(monitors)
-        max_x = max_y = 0
-        for lm in logical:
-            x, y, scale = lm[0], lm[1], lm[2]
-            assigned = lm[5] if len(lm) > 5 else []
-            for spec in assigned:
+
+        def size_of(lm):
+            scale = lm[2] or 1.0
+            for spec in (lm[5] if len(lm) > 5 else []):
                 mode = modes.get(spec[0])
-                if not mode or not scale:
-                    continue
-                max_x = max(max_x, x + int(mode[0] / scale))
-                max_y = max(max_y, y + int(mode[1] / scale))
-        if max_x and max_y:
-            return (max_x, max_y)
+                if mode:
+                    return (int(mode[0] / scale), int(mode[1] / scale))
+            return None
+
+        primary = next((lm for lm in logical if len(lm) > 4 and lm[4]), None)
+        for lm in ([primary] if primary else logical):
+            size = size_of(lm)
+            if size and size[0] and size[1]:
+                return size
     except (KeyError, IndexError, TypeError, ZeroDivisionError):
         pass
     return None

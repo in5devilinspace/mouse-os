@@ -63,7 +63,7 @@ def probe_capture():
         if shutil.which(tool):
             return Check("microphone", "ok", f"capture via {tool}")
     return Check("microphone", "unavailable", "no pw-record/arecord",
-                 "sudo apt install pipewire-utils or alsa-utils")
+                 "sudo apt install pipewire-bin (pw-record) or alsa-utils (arecord)")
 
 
 def probe_vosk(model_dir=None):

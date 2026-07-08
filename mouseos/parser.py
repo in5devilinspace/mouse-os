@@ -44,11 +44,12 @@ _FIXED = {
 _MOVE_TO_RE = re.compile(r"^move to (\d+)(%?) (\d+)(%?)$")
 
 
-def parse(utterance, apps=None, repl=False):
+def parse(utterance, apps=None, repl=False, steps=None):
     text = " ".join((utterance or "").lower().split())
     if not text:
         return None
     apps = tuple(apps) if apps is not None else grammar.DEFAULT_APPS
+    steps = steps if steps is not None else _STEPS
 
     if text in _FIXED:
         return _FIXED[text]
@@ -58,8 +59,8 @@ def parse(utterance, apps=None, repl=False):
         for direction, (vx, vy) in _DIR_VECTORS.items():
             if rest == direction or rest.startswith(direction + " "):
                 magnitude = rest[len(direction):].strip()
-                if magnitude in _STEPS:
-                    step = _STEPS[magnitude]
+                if magnitude in steps:
+                    step = steps[magnitude]
                     return Move(dx=vx * step, dy=vy * step)
         if repl:
             m = _MOVE_TO_RE.match(text)

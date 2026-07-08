@@ -20,6 +20,21 @@ _DEFAULT_CAMERA_CMD = (
     "?src=cam1&src=cam2&src=cam3&src=cam4"
 )
 
+# Spoken orientation for "where am i" — a lexicon deliberately DISJOINT from the
+# command grammar (which uses top/bottom/left/right/center/edge), so the mic
+# hearing the answer back can never be decoded as a movement command.
+_COMPASS = {
+    "center": "middle",
+    "top left": "northwest",
+    "top right": "northeast",
+    "bottom left": "southwest",
+    "bottom right": "southeast",
+    "top": "north",
+    "bottom": "south",
+    "left edge": "west",
+    "right edge": "east",
+}
+
 
 class Engine:
     def __init__(self, pointer, screen, feedback, windows=None, config=None,
@@ -62,7 +77,13 @@ class Engine:
     # -- the one entry point -------------------------------------------------
     def handle(self, intent):
         if intent is None:
-            self._say("pardon")
+            # Only complain when awake. While ASLEEP the mic is hot for safety
+            # but the machine must stay quiet, or ambient noise makes an idle
+            # accessibility device chatter "pardon?" indefinitely.
+            if self.awake:
+                self._say("pardon")
+            else:
+                self.feedback.event("asleep — ignored unrecognized input")
             return
 
         # state & safety commands work regardless of sleep state
@@ -82,6 +103,7 @@ class Engine:
             return
         if isinstance(intent, NeverMind):
             self._quit_pending_until = None
+            self._say("okay")
             return
         if isinstance(intent, Wake):
             self.awake = True
@@ -139,10 +161,10 @@ class Engine:
             x, y = self.position
             nx, ny = self.screen.clamp(x + intent.dx, y + intent.dy)
             dx, dy = nx - x, ny - y
-            self._undo_position = self.position
-            if dx or dy:
+            if dx or dy:                       # a clamped no-op keeps the undo slot
+                self._undo_position = self.position
                 self.pointer.move_rel(dx, dy)
-            self.position = (nx, ny)
+                self.position = (nx, ny)
             return
 
         if isinstance(intent, GoTo):
@@ -167,7 +189,11 @@ class Engine:
                     "window lookup unavailable — use grid one..nine "
                     "(GNOME 'Window Calls' extension enables point to <app>)")
                 return
-            rect = self.windows(intent.app)
+            # Resolve the spoken alias ("files") to its real wm_class
+            # ("nautilus") via config before asking the window resolver.
+            target = (self.config.get("apps", {}) or {}).get(
+                intent.app, intent.app)
+            rect = self.windows(target)
             if rect is None:
                 self._say("cant")
                 self.feedback.event(f"no window matching {intent.app!r}")
@@ -183,8 +209,11 @@ class Engine:
         if isinstance(intent, WhereAmI):
             x, y = self.position
             region = self.screen.nearest_region(x, y)
+            # Speak a COMPASS word, never the region name: "top"/"left"/"center"
+            # etc. are command words, and the mic hearing them back could
+            # self-issue a command. Compass words share nothing with the grammar.
             self.feedback.event(f"at ({x}, {y}) — near {region}")
-            self.feedback.say(region)
+            self.feedback.say(_COMPASS.get(region, "middle"))
             return
 
         if isinstance(intent, ListWindows):
@@ -202,7 +231,12 @@ class Engine:
             if self.launcher is None:
                 self._say("cant")
                 return
-            self.launcher(cmd)
+            try:
+                self.launcher(cmd)
+            except Exception as e:            # a bad command must not strand
+                self._say("cant")
+                self.feedback.error("launch", str(e))
+                return
             self._say("opening")
             return
 
