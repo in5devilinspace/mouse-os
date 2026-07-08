@@ -1,0 +1,51 @@
+{
+ "title": "The Quiet Command",
+ "logline": "One dark room at dawn, one person whose hands never move, and a whole computer that obeys their voice \u2014 stillness revealed not as limitation but as command, told through a single physical law: voice becomes light, and light becomes the pointer.",
+ "duration_seconds": 24,
+ "music_mood": "Near-silent and reverent. A single sustained warm drone in deep register, one soft felt-piano note that never resolves into a melody, and room tone: breath, a faint dawn hum. One gentle amber confirmation tone as the only \"event\" sound. Absolutely no swell, no strings, no slow-clap arc \u2014 the restraint is the flex. The loudest thing in the film is the person's own quiet voice.",
+ "overlay_plan": "Everything the Fal model can't reliably render is a composited layer in the brand palette (navy #0A0E1A ground, amber #FFB454 signal, light text #E8ECF6, monospace UI). Three overlay systems run across the film: (1) THE CURSOR \u2014 a crisp amber arrow that is born from light in Shot 2's breath-filament, travels the abstract path in Shot 3, and lands/clicks on the real screen surface in Shot 4; it is always the same object, obeying real physics (decelerate, tiny settle-bounce, click ring). (2) TYPOGRAPHY \u2014 sparse monospace captions bottom-left with generous negative space: the spoken command appears as a live subtitle keyed to the diegetic voice, and single-word beats ('point.') punctuate. (3) UI ECHO \u2014 in Shot 4 only, real desktop windows/panels animate on the monitor surface in sync with the cursor landing, kept dim and warm so they read as consequence, not as a SaaS screen-recording. The end card is pure composite: amber arrow settling into navy negative space, tagline, then CTA lockup. Cursor motion is always eased and deliberate \u2014 never a bouncing mascot.",
+ "end_card": "Full navy #0A0E1A. The amber arrow cursor drifts in from the last frame's light and settles, still, at rest. Line one (light #E8ECF6): \"Your voice is the pointer.\" Beat. Line two (monospace, amber #FFB454): \"Free \u00b7 offline \u00b7 open-source. Try Mouse OS tonight.\" with the repo/download URL beneath. No countdown, no urgency gimmick \u2014 the arrow simply waits, blinking once, patient for the next word.",
+ "credits_to_pitches": "SPINE + title \"The Quiet Command,\" the dawn-as-literal-amber-light throughline, and the closing dawn-flood reveal are the Creative Director's. The COLD-OPEN hand-signal amputation (still hands = power, not helplessness) and the \"the room is quiet, the computer isn't\" tension are the Hook Copywriter's. The film's governing physical law \u2014 voice becomes light, light becomes the cursor, with real deceleration weight and a machine-answers-back waveform handshake \u2014 is the Motion/3D Designer's, and the cursor-as-living-protagonist is theirs. The undeniable PROOF beat (wide shot, hands resting, real cursor glides to exactly where the voice said and clicks), the militant no-pity framing, and the plain amber-on-navy CTA (\"free, offline, open-source, try tonight\") are the Growth Marketer's. The split VO line \"Computers assumed hands. / We didn't.\" is drawn from the product's emotional core and delivered across the Marketer's return beat and the Director's close.",
+ "shots": [
+  {
+   "n": 1,
+   "seconds": 4,
+   "fal_prompt": "Cinematic extreme close-up of a person's relaxed hands resting completely motionless on a soft blanket over a wheelchair armrest in a very dark room just before dawn, deep navy-black shadows, one thin band of warm golden light grazing across the knuckles, gentle almost-imperceptible rise and fall of breathing, fine dust motes drifting slowly through the light, out-of-focus behind them a faint amber screen glow subtly shifting in brightness as if something is moving on its own, shallow depth of field, slow patient push-in, photorealistic, soft 24fps film grain, tender restrained mood, absolute stillness in the hands, no hand movement at all",
+   "overlay": "Hold clean for the first ~2.5s \u2014 let the stillness sit with no graphics. Then a single amber arrow cursor drifts softly into the lower frame and stops, parked and unmoving, echoing the stillness of the hands.",
+   "caption": "point.",
+   "vo": ""
+  },
+  {
+   "n": 2,
+   "seconds": 5,
+   "fal_prompt": "Cinematic three-quarter profile of a calm adult face in a dark room, softly lit by cool bluish monitor glow from off-camera with a warm amber rim light on the opposite cheek, eyes steady and confident tracking something off-frame, lips gently parting to speak a few quiet words, on the soft exhale a delicate thread of glowing warm amber light lifts from near the lips and begins to streak horizontally out of frame toward the screen, subtle warm reflection flickering in the eyes, shallow depth of field, near-black navy background hex 0A0E1A, warm amber accent hex FFB454, slow subtle dolly, photorealistic skin, peaceful and self-assured, no strain, reverent and humane, gentle film grain",
+   "overlay": "A soft amber waveform blooms low in frame in sync with the spoken words. The breath-filament of light resolves at its tip into the crisp amber arrow cursor \u2014 the pointer is literally born from the voice. Live monospace subtitle types out the command.",
+   "caption": "\u201cpoint to Firefox\u201d",
+   "vo": "(diegetic, quiet, unhurried) \u201cPoint to Firefox.\u201d"
+  },
+  {
+   "n": 3,
+   "seconds": 5,
+   "fal_prompt": "Abstract macro slow-motion light choreography in a deep near-black navy void, a single warm amber point of light streaks across the dark leaving a soft glowing comet trail that gently dissipates behind it, faint monospace grid texture barely visible in the background haze, the light decelerates with graceful real weight and eases to a crisp stop, settling with a tiny elastic bounce, then emits one soft concentric ring pulse outward at its resting point, volumetric glow, suspended luminous particles, anamorphic bokeh, background hex 0A0E1A, amber glow hex FFB454, precise intelligent obedient motion, elegant and clean, cinematic, no text, no interface, purely abstract",
+   "overlay": "The traveling light IS the amber arrow cursor \u2014 the composited arrow rides the streak, decelerates on the model's motion, and snaps exactly onto the ring-pulse landing point. At the settle, a soft click ring blooms and a gentle amber confirmation tone hits \u2014 the machine answering back.",
+   "caption": "",
+   "vo": "(soft synthesized confirmation, warm, brief) \u201cFirefox \u2014 opening.\u201d"
+  },
+  {
+   "n": 4,
+   "seconds": 5,
+   "fal_prompt": "Medium-wide cinematic shot pulling back slowly to reveal a single person seated calmly and still in a dim near-black navy room facing a large glowing monitor, body relaxed, hands resting motionless in their lap, warm amber rim light along one shoulder, the screen's light shifting and blooming in warm and cool tones across their face and the walls as things happen on it, dust motes drifting in the glow, deep navy-black environment hex 0A0E1A, warm amber accent hex FFB454, atmosphere of quiet control and unhurried capability, Apple-accessibility-ad restraint, camera easing back a few feet, photorealistic, dignified, subtle film grain, no reaching, no hand movement, no readable interface",
+   "overlay": "This is the honest proof beat. On the monitor surface, real dim-warm desktop windows/panels open and settle in exact sync with the amber cursor arriving and clicking \u2014 nothing on the person's body moved, yet the machine obeyed. Cursor lands precisely where the voice said, faithful to product behavior. A small monospace confirmation tag glints at the cursor.",
+   "caption": "hands still. the cursor isn\u2019t.",
+   "vo": "(VO, calm, plainspoken) \u201cComputers assumed hands.\u201d"
+  },
+  {
+   "n": 5,
+   "seconds": 5,
+   "fal_prompt": "Cinematic medium shot of the person in the dark room as warm golden dawn light gradually floods in through a window and washes over them, the deep navy shadows warming to amber, they exhale softly and turn their face toward the light with the faintest genuine peaceful half-smile, expression of quiet self-sufficiency and ease rather than triumph, dust and morning haze glowing in the beam, serene and humane, deep navy tones hex 0A0E1A warming to amber hex FFB454, photorealistic, gentle slow motion, hopeful and grounded, emotional but deeply restrained, soft film grain, no medical props centered, no interface",
+   "overlay": "As the dawn warms the frame, cut/dissolve toward full navy negative space on the left. The amber arrow cursor drifts in and settles, still and patient. Tagline resolves, then the CTA lockup fades up in monospace amber-on-navy with the download URL. Cursor blinks once, waiting.",
+   "caption": "Your voice is the pointer.  //  Free \u00b7 offline \u00b7 open-source \u2014 try Mouse OS tonight.",
+   "vo": "(VO, softer, the answer) \u201cWe didn\u2019t. Your voice is the pointer.\u201d"
+  }
+ ]
+}
