@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Mouse OS — your voice is the pointer. Voice-controlled cursor for Ubuntu, accessibility-first, offline.">
+<title>Mouse OS — Your voice is the pointer</title>
+</head>
+<body>
+<style>
+  :root {
+    --ink: #0A0E1A;
+    --panel: #141B2E;
+    --panel-2: #1B2440;
+    --line: #232E4E;
+    --signal: #FFB454;
+    --signal-dim: rgba(255, 180, 84, 0.14);
+    --pointer: #E8ECF6;
+    --text: #C9D1E4;
+    --muted: #8A93AD;
+    --ok: #6FCF97;
+    --radius: 10px;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", "DejaVu Sans Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --ink: #EEF1F7;
+      --panel: #FFFFFF;
+      --panel-2: #F5F7FC;
+      --line: #D8DEEC;
+      --signal: #B06E14;
+      --signal-dim: rgba(176, 110, 20, 0.10);
+      --pointer: #1A2233;
+      --text: #313B54;
+      --muted: #5C6residue682;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #0A0E1A; --panel: #141B2E; --panel-2: #1B2440; --line: #232E4E;
+    --signal: #FFB454; --signal-dim: rgba(255,180,84,0.14);
+    --pointer: #E8ECF6; --text: #C9D1E4; --muted: #8A93AD;
+  }
+  :root[data-theme="light"] {
+    --ink: #EEF1F7; --panel: #FFFFFF; --panel-2: #F5F7FC; --line: #D8DEEC;
+    --signal: #B06E14; --signal-dim: rgba(176,110,20,0.10);
+    --pointer: #1A2233; --text: #313B54; --muted: #5C6682;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--ink);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- header ---------- */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 0;
+  }
+  .wordmark {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 15px; letter-spacing: 0.08em;
+    color: var(--pointer); text-decoration: none; font-weight: 600;
+  }
+  .wordmark svg { display: block; }
+  .nav-cta {
+    font-family: var(--mono); font-size: 13px; text-decoration: none;
+    color: var(--signal); border: 1px solid var(--line);
+    padding: 8px 14px; border-radius: 999px;
+  }
+  .nav-cta:hover, .nav-cta:focus-visible { border-color: var(--signal); outline: none; }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 48px 0 24px; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--signal); margin: 0 0 18px;
+  }
+  h1 {
+    font-size: clamp(44px, 7.5vw, 92px);
+    line-height: 0.98; letter-spacing: -0.03em;
+    font-weight: 750; color: var(--pointer);
+    margin: 0 0 22px; text-wrap: balance; max-width: 11ch;
+  }
+  h1 .accent { color: var(--signal); }
+  .lede {
+    font-size: 19px; max-width: 54ch; margin: 0 0 28px; color: var(--text);
+  }
+  .lede strong { color: var(--pointer); font-weight: 600; }
+
+  .say-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 40px; }
+  .chip {
+    font-family: var(--mono); font-size: 13.5px;
+    border: 1px solid var(--line); border-radius: 999px;
+    padding: 8px 15px; color: var(--muted);
+    transition: color 0.3s, border-color 0.3s, background 0.3s;
+  }
+  .chip.live {
+    color: var(--signal); border-color: var(--signal);
+    background: var(--signal-dim);
+  }
+  .chip::before { content: "“"; opacity: 0.6; }
+  .chip::after { content: "”"; opacity: 0.6; }
+
+  /* ---------- demo screen ---------- */
+  .screen {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  }
+  .screen-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 11px 16px; border-bottom: 1px solid var(--line);
+    background: var(--panel-2);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+  .screen-bar .title {
+    margin-left: 8px; font-family: var(--mono); font-size: 12px; color: var(--muted);
+  }
+  .screen-bar .mic {
+    margin-left: auto; display: flex; align-items: center; gap: 7px;
+    font-family: var(--mono); font-size: 11.5px; color: var(--signal);
+    letter-spacing: 0.1em;
+  }
+  .mic-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--signal);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .mic-dot { animation: pulse 1.6s ease-in-out infinite; }
+    @keyframes pulse { 50% { opacity: 0.25; } }
+  }
+  #demo { display: block; width: 100%; height: 420px; }
+  .talkback {
+    border-top: 1px solid var(--line);
+    padding: 13px 18px;
+    font-family: var(--mono); font-size: 14px;
+    color: var(--text); background: var(--panel-2);
+    display: flex; gap: 10px; align-items: baseline;
+    min-height: 48px;
+  }
+  .talkback .who { color: var(--signal); flex-shrink: 0; }
+
+  /* ---------- sections ---------- */
+  section { padding: 88px 0 0; }
+  .kicker {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--signal); margin: 0 0 14px;
+  }
+  h2 {
+    font-size: clamp(30px, 4vw, 44px); line-height: 1.05;
+    letter-spacing: -0.02em; font-weight: 700; color: var(--pointer);
+    margin: 0 0 18px; text-wrap: balance;
+  }
+  .section-lede { max-width: 58ch; font-size: 17px; margin: 0 0 40px; }
+
+  .grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  }
+  @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 24px 22px;
+  }
+  .card .glyph { margin-bottom: 16px; }
+  .card h3 {
+    font-size: 17px; color: var(--pointer); margin: 0 0 8px; font-weight: 650;
+    letter-spacing: -0.01em;
+  }
+  .card p { font-size: 14.5px; color: var(--muted); margin: 0; }
+  .card .status {
+    display: inline-block; margin-top: 14px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ok);
+  }
+  .card .status.soon { color: var(--muted); }
+
+  /* ---------- pipeline ---------- */
+  .pipeline {
+    display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 14px;
+    align-items: stretch;
+  }
+  @media (max-width: 760px) {
+    .pipeline { grid-template-columns: 1fr; }
+    .pipe-arrow { transform: rotate(90deg); justify-self: center; }
+  }
+  .stage {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 22px;
+  }
+  .stage .n {
+    font-family: var(--mono); font-size: 12px; color: var(--signal);
+    letter-spacing: 0.16em; display: block; margin-bottom: 10px;
+  }
+  .stage h3 { margin: 0 0 8px; font-size: 17px; color: var(--pointer); }
+  .stage p { margin: 0; font-size: 14px; color: var(--muted); }
+  .stage code {
+    font-family: var(--mono); font-size: 12.5px; color: var(--text);
+    background: var(--signal-dim); padding: 1px 6px; border-radius: 4px;
+  }
+  .pipe-arrow { align-self: center; color: var(--signal); }
+
+  /* ---------- manifesto ---------- */
+  .manifesto {
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    margin-top: 88px; padding: 72px 0;
+    background: var(--panel);
+  }
+  .manifesto blockquote {
+    margin: 0; font-size: clamp(26px, 3.6vw, 40px); line-height: 1.25;
+    letter-spacing: -0.02em; font-weight: 640; color: var(--pointer);
+    max-width: 26ch; text-wrap: balance;
+  }
+  .manifesto blockquote .accent { color: var(--signal); }
+  .manifesto figcaption {
+    margin-top: 22px; font-family: var(--mono); font-size: 13px; color: var(--muted);
+  }
+
+  /* ---------- roadmap ---------- */
+  .road { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 760px) { .road { grid-template-columns: 1fr; } }
+  .milestone {
+    border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 22px; background: var(--panel);
+  }
+  .milestone.now { border-color: var(--signal); }
+  .milestone .tag {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 12px;
+  }
+  .milestone.now .tag { color: var(--signal); }
+  .milestone h3 { margin: 0 0 10px; font-size: 17px; color: var(--pointer); }
+  .milestone ul { margin: 0; padding-left: 18px; font-size: 14px; color: var(--muted); }
+  .milestone li { margin-bottom: 6px; }
+
+  /* ---------- cta ---------- */
+  .cta { text-align: center; padding: 100px 0 90px; }
+  .cta h2 { max-width: none; }
+  .cta .sub { color: var(--muted); font-size: 16px; margin: 0 0 34px; }
+  .btn {
+    display: inline-block; font-family: var(--mono); font-size: 15px;
+    text-decoration: none; font-weight: 600;
+    background: var(--signal); color: var(--ink);
+    padding: 15px 30px; border-radius: 999px;
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .btn:focus-visible { outline: 3px solid var(--signal-dim); outline-offset: 3px; }
+  .cta .mono-note {
+    margin-top: 18px; font-family: var(--mono); font-size: 12.5px; color: var(--muted);
+  }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 26px 0 40px;
+    display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    font-family: var(--mono); font-size: 12.5px; color: var(--muted);
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <a class="wordmark" href="#top" aria-label="Mouse OS home">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M5 3 L19 12 L12.5 13.5 L15.5 20 L12.8 21.2 L9.8 14.6 L5 19 Z"
+              fill="var(--signal)"/>
+      </svg>
+      MOUSE&nbsp;OS
+    </a>
+    <a class="nav-cta" href="https://github.com/in5devilinspace/mouse-os">github ↗</a>
+  </header>
+
+  <main id="top">
+    <div class="hero">
+      <p class="eyebrow">Hands-free shell · Ubuntu · Wayland-native · Offline</p>
+      <h1>Your <span class="accent">voice</span> is the pointer.</h1>
+      <p class="lede">
+        Mouse OS puts a <strong>living cursor</strong> on your desktop. Say where — it goes.
+        Say click — it clicks. And it <strong>answers out loud</strong>, so you always know
+        it heard you. Built first for people who can't use their hands.
+        No cloud. No keyboard. No mouse. <strong>No hands.</strong>
+      </p>
+      <div class="say-row" id="chips" aria-hidden="true">
+        <span class="chip">point to the browser</span>
+        <span class="chip">click</span>
+        <span class="chip">scroll down</span>
+        <span class="chip">mouse, sleep</span>
+      </div>
+
+      <div class="screen">
+        <div class="screen-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="title">your desktop — being operated by voice</span>
+          <span class="mic"><span class="mic-dot"></span>MIC LIVE</span>
+        </div>
+        <canvas id="demo" role="img"
+          aria-label="Animated demo: a cursor glides to apps and clicks them as voice commands are spoken"></canvas>
+        <div class="talkback">
+          <span class="who">mouse&nbsp;»</span>
+          <span id="talkback-text">listening…</span>
+        </div>
+      </div>
+    </div>
+
+    <section>
+      <p class="kicker">What it does</p>
+      <h2>A cursor with ears, a voice, and manners.</h2>
+      <p class="section-lede">
+        Every piece runs on your machine. Speech never leaves the room —
+        recognition is fully offline.
+      </p>
+      <div class="grid">
+        <div class="card">
+          <div class="glyph">
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+              <rect x="3" y="10" width="3" height="10" rx="1.5" fill="var(--signal)"/>
+              <rect x="9" y="5" width="3" height="20" rx="1.5" fill="var(--signal)"/>
+              <rect x="15" y="12" width="3" height="6" rx="1.5" fill="var(--signal)"/>
+              <rect x="21" y="7" width="3" height="16" rx="1.5" fill="var(--signal)"/>
+            </svg>
+          </div>
+          <h3>Speak, it moves</h3>
+          <p>Offline speech recognition tuned to a tight command grammar — accurate
+             because it listens for <em>your commands</em>, not the whole dictionary.</p>
+          <span class="status">shipping · v1</span>
+        </div>
+        <div class="card">
+          <div class="glyph">
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+              <path d="M4 8h14v10H10l-4 4v-4H4z" stroke="var(--signal)" stroke-width="2" fill="none" stroke-linejoin="round"/>
+              <path d="M22 12h4M22 16h4M24 10v8" stroke="var(--signal)" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>It talks back</h3>
+          <p>“Clicked.” “Didn't catch that.” Every command is confirmed out loud —
+             silence is never an answer when your voice is your only input.</p>
+          <span class="status">shipping · v1</span>
+        </div>
+        <div class="card">
+          <div class="glyph">
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+              <path d="M6 3 L24 14 L16 16 L20 25 L16.5 26.6 L12.6 17.8 L6 23 Z"
+                    stroke="var(--signal)" stroke-width="2" fill="none" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3>A real cursor, not a widget</h3>
+          <p>Mouse OS drives a kernel-level virtual mouse. The pointer that moves is
+             <em>the</em> pointer — every app, every menu, Wayland-native.</p>
+          <span class="status">shipping · v1</span>
+        </div>
+        <div class="card">
+          <div class="glyph">
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+              <rect x="3" y="20" width="24" height="5" rx="2" stroke="var(--signal)" stroke-width="2" fill="none"/>
+              <circle cx="22.5" cy="22.5" r="1.6" fill="var(--signal)"/>
+              <path d="M15 16v-4m0 0 3 2m-3-2-3 2" stroke="var(--signal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3>Lives in your taskbar</h3>
+          <p>An indicator that shows when it's listening, a hard mute you can trust,
+             and settings for speed, glide, and voice — right where Ubuntu keeps them.</p>
+          <span class="status soon">next · v1.1</span>
+        </div>
+        <div class="card">
+          <div class="glyph">
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+              <ellipse cx="15" cy="15" rx="12" ry="7" stroke="var(--signal)" stroke-width="2" fill="none"/>
+              <circle cx="15" cy="15" r="3" fill="var(--signal)"/>
+            </svg>
+          </div>
+          <h3>Look, and it follows</h3>
+          <p>Eye-tracking mode: the cursor rides your gaze, your voice does the clicking.
+             Hands behind your back. All day.</p>
+          <span class="status soon">roadmap · v2</span>
+        </div>
+        <div class="card">
+          <div class="glyph">
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+              <rect x="3" y="5" width="11" height="8" rx="1.5" stroke="var(--signal)" stroke-width="2" fill="none"/>
+              <rect x="16" y="5" width="11" height="8" rx="1.5" stroke="var(--signal)" stroke-width="2" fill="none"/>
+              <rect x="3" y="16" width="11" height="8" rx="1.5" stroke="var(--signal)" stroke-width="2" fill="none"/>
+              <rect x="16" y="16" width="11" height="8" rx="1.5" stroke="var(--signal)" stroke-width="2" fill="none"/>
+            </svg>
+          </div>
+          <h3>Sees your world</h3>
+          <p>Say “show my cameras” and get a wall of your security feeds. Say
+             “have the web agent order it” and errands run themselves.</p>
+          <span class="status soon">roadmap · v2</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <p class="kicker">How it works</p>
+      <h2>Three moving parts. Zero cloud.</h2>
+      <div class="pipeline">
+        <div class="stage">
+          <span class="n">01 · EARS</span>
+          <h3>Voice</h3>
+          <p>Your microphone feeds an offline recognizer constrained to the Mouse OS
+             grammar. <code>"point to firefox"</code> comes out as text, instantly.</p>
+        </div>
+        <svg class="pipe-arrow" width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+          <path d="M4 13h16m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="stage">
+          <span class="n">02 · BRAIN</span>
+          <h3>Intent</h3>
+          <p>A parser turns words into one precise instruction —
+             <code>Point(target="firefox")</code> — and asks aloud when it's ambiguous.</p>
+        </div>
+        <svg class="pipe-arrow" width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+          <path d="M4 13h16m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="stage">
+          <span class="n">03 · HAND</span>
+          <h3>Pointer</h3>
+          <p>A kernel-level virtual mouse glides the real cursor there and clicks —
+             then the voice confirms: <code>"clicked."</code></p>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<figure class="manifesto">
+  <div class="wrap">
+    <blockquote>
+      Computers assumed hands.<br>
+      <span class="accent">We didn't.</span>
+    </blockquote>
+    <figcaption>— built for the millions who compute without them</figcaption>
+  </div>
+</figure>
+
+<div class="wrap">
+  <section>
+    <p class="kicker">Roadmap</p>
+    <h2>Where this is going.</h2>
+    <div class="road">
+      <div class="milestone now">
+        <span class="tag">v1 · today</span>
+        <h3>The talking cursor</h3>
+        <ul>
+          <li>Voice → real cursor on Wayland</li>
+          <li>Point, click, drag, scroll by speech</li>
+          <li>Spoken confirmations</li>
+          <li>Fully offline recognition</li>
+        </ul>
+      </div>
+      <div class="milestone">
+        <span class="tag">v1.1 · next</span>
+        <h3>Part of the desktop</h3>
+        <ul>
+          <li>Taskbar indicator + hard mute</li>
+          <li>“Point to Firefox” window targeting</li>
+          <li>Speed, glide &amp; pointer-lock settings</li>
+          <li>Instant “stop / undo / never mind”</li>
+        </ul>
+      </div>
+      <div class="milestone">
+        <span class="tag">v2 · the vision</span>
+        <h3>A hands-free OS</h3>
+        <ul>
+          <li>Live conversation — a cursor persona</li>
+          <li>Eye-tracking: gaze moves, voice clicks</li>
+          <li>Web agent runs errands for you</li>
+          <li>Camera wall for your home feeds</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="cta">
+    <h2>Put your hands behind your back.</h2>
+    <p class="sub">Open source, offline, and yours. Star it, build it, or just talk to it.</p>
+    <a class="btn" href="https://github.com/in5devilinspace/mouse-os">Get Mouse OS on GitHub →</a>
+    <p class="mono-note">$ say "point to the future"&nbsp;&nbsp;» found it. moving…</p>
+  </div>
+
+  <footer>
+    <span>MOUSE OS — an accessibility-first project</span>
+    <span>made with voice. literally.</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  const canvas = document.getElementById('demo');
+  const ctx = canvas.getContext('2d');
+  const talkback = document.getElementById('talkback-text');
+  const chips = Array.from(document.querySelectorAll('#chips .chip'));
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let W = 0, H = 0, dpr = 1;
+  function cssVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+  let C = {};
+  function loadColors() {
+    C = {
+      signal: cssVar('--signal') || '#FFB454',
+      pointer: cssVar('--pointer') || '#E8ECF6',
+      line: cssVar('--line') || '#232E4E',
+      muted: cssVar('--muted') || '#8A93AD',
+      panel2: cssVar('--panel-2') || '#1B2440',
+      ink: cssVar('--ink') || '#0A0E1A'
+    };
+  }
+  loadColors();
+  new MutationObserver(loadColors)
+    .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  if (matchMedia('(prefers-color-scheme: dark)').addEventListener) {
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', loadColors);
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = canvas.clientWidth; H = canvas.clientHeight;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    layout();
+  }
+
+  // --- scene: three app tiles + a dock line ---
+  let tiles = [];
+  function layout() {
+    const tw = Math.min(150, W * 0.2), th = tw * 0.72;
+    const y = H * 0.32;
+    const names = ['Browser', 'Files', 'Music'];
+    const cx = [W * 0.22, W * 0.5, W * 0.78];
+    tiles = names.map((name, i) => ({
+      name, w: tw, h: th, x: cx[i] - tw / 2, y: y - th / 2, glow: 0
+    }));
+  }
+
+  function drawTile(t) {
+    ctx.save();
+    ctx.globalAlpha = 1;
+    const r = 10;
+    ctx.beginPath();
+    ctx.roundRect(t.x, t.y, t.w, t.h, r);
+    ctx.fillStyle = C.panel2;
+    ctx.fill();
+    ctx.lineWidth = t.glow > 0.02 ? 2 : 1.2;
+    ctx.strokeStyle = t.glow > 0.02 ? C.signal : C.line;
+    ctx.globalAlpha = t.glow > 0.02 ? (0.45 + 0.55 * t.glow) : 1;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // glyph per app
+    ctx.strokeStyle = C.muted; ctx.fillStyle = C.muted; ctx.lineWidth = 1.8;
+    const gx = t.x + t.w / 2, gy = t.y + t.h / 2 - 6;
+    ctx.beginPath();
+    if (t.name === 'Browser') {
+      ctx.arc(gx, gy, 11, 0, Math.PI * 2);
+      ctx.moveTo(gx - 11, gy); ctx.lineTo(gx + 11, gy);
+      ctx.moveTo(gx, gy - 11);
+      ctx.ellipse(gx, gy, 5, 11, 0, -Math.PI / 2, Math.PI * 1.5);
+    } else if (t.name === 'Files') {
+      ctx.roundRect(gx - 12, gy - 8, 24, 17, 3);
+      ctx.moveTo(gx - 12, gy - 8);
+      ctx.lineTo(gx - 12, gy - 11); ctx.lineTo(gx - 3, gy - 11); ctx.lineTo(gx, gy - 8);
+    } else {
+      ctx.arc(gx - 5, gy + 7, 3.6, 0, Math.PI * 2);
+      ctx.moveTo(gx - 1.4, gy + 7); ctx.lineTo(gx - 1.4, gy - 9); ctx.lineTo(gx + 10, gy - 11);
+      ctx.lineTo(gx + 10, gy + 4);
+      ctx.arc(gx + 6.4, gy + 4, 3.6, 0, Math.PI * 2);
+    }
+    ctx.stroke();
+
+    ctx.font = '12px ' + '"SF Mono", Menlo, Consolas, monospace';
+    ctx.fillStyle = C.muted;
+    ctx.textAlign = 'center';
+    ctx.fillText(t.name, t.x + t.w / 2, t.y + t.h - 10);
+    ctx.restore();
+  }
+
+  function drawCursor(x, y, scale) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    ctx.beginPath();
+    ctx.moveTo(0, 0); ctx.lineTo(0, 19); ctx.lineTo(4.4, 14.8);
+    ctx.lineTo(7.6, 21.4); ctx.lineTo(10.6, 20); ctx.lineTo(7.4, 13.6);
+    ctx.lineTo(13.4, 13); ctx.closePath();
+    ctx.fillStyle = C.pointer;
+    ctx.strokeStyle = C.ink;
+    ctx.lineWidth = 1.4;
+    ctx.shadowColor = 'rgba(0,0,0,0.4)';
+    ctx.shadowBlur = 8; ctx.shadowOffsetY = 2;
+    ctx.fill();
+    ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawWave(t, active) {
+    const n = 28, bw = 3, gap = 6.5;
+    const total = n * (bw + gap);
+    const x0 = W / 2 - total / 2, y0 = H - 34;
+    for (let i = 0; i < n; i++) {
+      const ph = t / 240 + i * 0.55;
+      const amp = active ? (6 + 11 * Math.abs(Math.sin(ph)) * (0.4 + 0.6 * Math.abs(Math.sin(i * 1.7 + t / 500)))) : 3;
+      ctx.beginPath();
+      ctx.roundRect(x0 + i * (bw + gap), y0 - amp / 2, bw, amp, 2);
+      ctx.fillStyle = active ? C.signal : C.line;
+      ctx.globalAlpha = active ? 0.9 : 0.7;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // ripple effect on click
+  let ripples = [];
+  function drawRipples(dt) {
+    ripples = ripples.filter(r => r.a > 0.02);
+    for (const r of ripples) {
+      r.r += dt * 0.09; r.a *= Math.pow(0.994, dt);
+      ctx.beginPath();
+      ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2);
+      ctx.strokeStyle = C.signal;
+      ctx.globalAlpha = r.a;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // --- script of the demo ---
+  const SCRIPT = [
+    { chip: 0, say: 'point to the browser', tile: 0, reply: 'found Browser. moving…' },
+    { chip: 1, say: 'click', click: true, reply: 'clicked.' },
+    { chip: 2, say: 'scroll down', scroll: true, reply: 'scrolling.' },
+    { chip: 0, say: 'point to files', tile: 1, reply: 'found Files. moving…' },
+    { chip: 1, say: 'click', click: true, reply: 'clicked.' },
+    { chip: 3, say: 'mouse, sleep', sleep: true, reply: 'going quiet. say “mouse, wake” anytime.' }
+  ];
+
+  let cur = { x: 0, y: 0 }, target = { x: 0, y: 0 };
+  let step = -1, phase = 'idle', phaseT = 0, sleeping = 0, scrollY = 0;
+  let last = 0;
+
+  function setChip(i) {
+    chips.forEach((c, j) => c.classList.toggle('live', i === j));
+  }
+
+  function advance() {
+    step = (step + 1) % SCRIPT.length;
+    const s = SCRIPT[step];
+    setChip(s.chip);
+    talkback.textContent = '';
+    phase = 'hear'; phaseT = 0;
+  }
+
+  function ease(a, b, k) { return a + (b - a) * k; }
+
+  function frame(now) {
+    const dt = Math.min(50, now - last); last = now;
+    ctx.clearRect(0, 0, W, H);
+
+    // faint grid — a desktop, abstracted
+    ctx.strokeStyle = C.line; ctx.globalAlpha = 0.25; ctx.lineWidth = 1;
+    const g = 44;
+    for (let x = (scrollY / 3) % g; x < W; x += g) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    }
+    for (let y = -scrollY % g; y < H; y += g) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    for (const t of tiles) { t.glow *= Math.pow(0.996, dt); drawTile(t); }
+    drawRipples(dt);
+
+    const dim = ease(1, 0.35, sleeping);
+    ctx.globalAlpha = dim;
+
+    phaseT += dt;
+    const s = SCRIPT[step] || {};
+    if (phase === 'idle') {
+      if (phaseT > 600) advance();
+    } else if (phase === 'hear') {
+      if (phaseT > 900) {
+        talkback.textContent = s.reply;
+        phase = 'act'; phaseT = 0;
+        if (s.tile != null) {
+          const t = tiles[s.tile];
+          target = { x: t.x + t.w / 2 + 14, y: t.y + t.h / 2 + 6 };
+        }
+      }
+    } else if (phase === 'act') {
+      if (s.tile != null) {
+        cur.x = ease(cur.x, target.x, 1 - Math.pow(0.994, dt));
+        cur.y = ease(cur.y, target.y, 1 - Math.pow(0.994, dt));
+        const done = Math.hypot(cur.x - target.x, cur.y - target.y) < 2;
+        if (done && phaseT > 700) { tiles[s.tile].glow = 1; phase = 'wait'; phaseT = 0; }
+      } else if (s.click) {
+        if (phaseT < 40) ripples.push({ x: cur.x, y: cur.y, r: 4, a: 0.9 });
+        if (phaseT > 700) phase = 'wait', phaseT = 0;
+      } else if (s.scroll) {
+        scrollY += dt * 0.06;
+        if (phaseT > 1300) phase = 'wait', phaseT = 0;
+      } else if (s.sleep) {
+        sleeping = Math.min(1, sleeping + dt / 900);
+        if (phaseT > 2400) { sleeping = 0; phase = 'wait'; phaseT = 0; }
+      } else {
+        phase = 'wait'; phaseT = 0;
+      }
+    } else if (phase === 'wait') {
+      if (phaseT > 1100) advance();
+    }
+
+    drawCursor(cur.x, cur.y, 1.15);
+    ctx.globalAlpha = 1;
+    drawWave(now, phase === 'hear' && !s.sleep);
+
+    requestAnimationFrame(frame);
+  }
+
+  function staticScene() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.strokeStyle = C.line; ctx.globalAlpha = 0.25;
+    for (let x = 0; x < W; x += 44) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+    for (let y = 0; y < H; y += 44) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+    ctx.globalAlpha = 1;
+    tiles[0].glow = 1;
+    tiles.forEach(drawTile);
+    drawCursor(tiles[0].x + tiles[0].w / 2 + 14, tiles[0].y + tiles[0].h / 2 + 6, 1.15);
+    drawWave(0, false);
+    talkback.textContent = 'found Browser. moving… clicked.';
+    setChip(0);
+  }
+
+  window.addEventListener('resize', () => { resize(); if (reduced) staticScene(); });
+  resize();
+  cur = { x: W / 2, y: H * 0.75 };
+
+  if (reduced) {
+    staticScene();
+  } else {
+    requestAnimationFrame(t => { last = t; advance(); frame(t); });
+  }
+})();
+</script>
+
+</body>
+</html>
