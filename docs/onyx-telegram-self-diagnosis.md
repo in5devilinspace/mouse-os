@@ -23,7 +23,7 @@ Tell Onyx:
 - *"Fix yourself — you gave me the wrong viewer link"*
 - *"Read the transcript and patch the workflow"*
 
-→ Routes to **dev_fix** → Telegram approval → **dev-bridge** runs Claude Code on your dev machine.
+→ Routes to **dev_fix** → Telegram approval → **dev-bridge** on VPS runs Claude Code on the repo.
 
 ## What you still need running
 

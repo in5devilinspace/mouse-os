@@ -73,18 +73,16 @@ Matt: "fix email routing"  →  Orchestrator  →  dev_fix agent
 
 | Component | Where | Port |
 |-----------|-------|------|
-| `dev-bridge/control.py` | VPS (Postgres read) | 8622 |
-| `dev-bridge/bridge.py` | Dev machine (Claude Code) | — |
+| `dev-bridge/bridge.py` | **VPS** (recommended) or dev PC | — |
 | n8n webhooks | VPS | `/webhook/dev/poll`, `/webhook/dev/result` |
 
 ## VPS setup
 
 1. Apply DDL: `dev_commands` in `build/schema.sql`
-2. Env: `DEVBRIDGE_HMAC_SECRET` (same as dev machine)
-3. Credential **DevBridge**: `Authorization: Bearer <DEV_CONTROL_TOKEN>`
-4. Credential **HomeBridge**: reused for enqueue + dev poll webhooks
-5. Run: `PORT=8622 DEV_CONTROL_TOKEN=... python3 dev-bridge/control.py`
-6. Re-import workflow: `python3 scripts/gen-dev-fix.py` then import `build/Matts-Ultimate-Assistant.json`
+2. Env on VPS `/opt/n8n/.env`: `DEVBRIDGE_HMAC_SECRET`, `HOME_BRIDGE_TOKEN`
+3. Credential **HomeBridge** in n8n: `Authorization: Bearer <HOME_BRIDGE_TOKEN>`
+4. Re-import workflow: `python3 scripts/gen-dev-fix.py` then import `build/Matts-Ultimate-Assistant.json`
+5. **Install dev-bridge on VPS:** `sudo bash scripts/install-dev-bridge-vps.sh`
 
 ## Manual dev machine setup (fallback)
 
