@@ -1,0 +1,80 @@
+1
+00:00:01,000 --> 00:00:09,337
+Hi. I'm your mouse pointer. As of today, you can talk to me.
+
+2
+00:00:10,616 --> 00:00:17,161
+Step 1 — install: clone, then two commands. Straight from the README.
+
+3
+00:00:18,774 --> 00:00:26,430
+One line needs your password — it lets me move the real pointer.
+
+4
+00:00:24,566 --> 00:00:32,065
+Step 2 — the health check. Green means go.
+
+5
+00:00:28,232 --> 00:00:33,633
+The yellow line is optional — the grid reaches every pixel without it.
+
+6
+00:00:35,216 --> 00:00:43,399
+Step 3 — download my ears (~40 MB, 100% offline). Then: run.
+
+7
+00:00:42,599 --> 00:00:49,256
+I start asleep — stray words never move me. Say: “mouse wake”
+
+8
+00:00:53,483 --> 00:00:58,230
+Aiming is a grid, 1–9. Say: “grid five”
+
+9
+00:01:00,530 --> 00:01:06,290
+Hear the quiet? Motion is silent — I only speak when something happens.
+
+10
+00:01:06,290 --> 00:01:10,978
+Fine-tune: “move up a little” · “move right a lot”
+
+11
+00:01:10,890 --> 00:01:18,721
+“point to firefox” — needs the Window Calls extension (grid works without)
+
+12
+00:01:20,799 --> 00:01:23,459
+Now act. Say: “click”
+
+13
+00:01:25,608 --> 00:01:29,484
+A drag is two words: “hold” … “release”
+
+14
+00:01:34,284 --> 00:01:37,534
+The wheel: “scroll down a lot”
+
+15
+00:01:39,149 --> 00:01:43,379
+Three words are always hot. “stop” freezes me.
+
+16
+00:01:42,988 --> 00:01:45,183
+“undo” takes it back.
+
+17
+00:01:47,621 --> 00:01:50,928
+“never mind” means forget it.
+
+18
+00:01:52,828 --> 00:01:55,564
+Lost? Ask: “where am i”
+
+19
+00:01:59,033 --> 00:02:04,133
+Done? “mouse quit” — I always double-check.
+
+20
+00:02:11,349 --> 00:02:21,990
+Free · offline · open source — github.com/in5devilinspace/mouse-os
+

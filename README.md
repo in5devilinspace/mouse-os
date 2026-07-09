@@ -4,6 +4,8 @@
 
 > Landing page & live demo: see `docs/index.html` (GitHub Pages). Feature roadmap decided by an AI roundtable: `docs/roadmap/2026-07-07-feature-roundtable.md`.
 
+> ▶ **Prefer watching?** [The 2-minute tutorial film](https://in5devilinspace.github.io/mouse-os/mouse-os-tutorial.mp4) — install to "goodbye", narrated by the cursor itself (its real offline voice), captions included. Pipeline: `tools/video/tutorial/`.
+
 ## How it works
 
 ```
