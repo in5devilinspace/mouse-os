@@ -1,10 +1,34 @@
 # Dev Bridge — Onyx Self-Fix via Claude Code
 
-When Matt tells Onyx to **fix something about itself**, Onyx diagnoses the issue and queues a repair. After Matt approves at the Telegram HITL gate, **dev-bridge** on his dev machine long-polls the VPS, launches **Claude Code** with skills/plugins/MCP, and posts the result back.
+When Matt tells Onyx to **fix something about itself**, Onyx diagnoses the issue and queues a repair. After Matt approves at the Telegram HITL gate, **dev-bridge** long-polls n8n, launches **Claude Code**, and posts the result back.
 
-## Quick install (recommended)
+## VPS install (recommended — 24/7, no dev PC required)
 
-From this repo root:
+Run **on the VPS** as root, next to Onyx:
+
+```bash
+cd /opt/n8n-ultimate-assistant   # or your repo path on VPS
+sudo bash scripts/install-dev-bridge-vps.sh
+```
+
+This:
+
+1. Installs to `/opt/dev-bridge/` (bridge.py + fix_prompt.md)
+2. Seeds `.env` from `/opt/n8n/.env` (`HOME_BRIDGE_TOKEN`, `DEVBRIDGE_HMAC_SECRET`)
+3. Polls **local n8n** at `http://127.0.0.1:5678` (no public round-trip)
+4. Uses **cliproxy** for headless Claude Code (`ANTHROPIC_BASE_URL=http://172.19.0.1:8317/v1`)
+5. Enables **systemd** service `vps-dev-bridge` (always on)
+
+```bash
+journalctl -u vps-dev-bridge -f
+systemctl status vps-dev-bridge
+```
+
+Matt's dev machine **does not** need `dev-bridge` running when VPS install is active.
+
+## Dev PC install (legacy / optional)
+
+From this repo root on your **dev machine** (only if you want fixes applied to a local repo clone):
 
 ```bash
 bash scripts/install-dev-bridge.sh

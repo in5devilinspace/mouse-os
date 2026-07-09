@@ -25,30 +25,32 @@ Tell Onyx:
 
 → Routes to **dev_fix** → Telegram approval → **dev-bridge** runs Claude Code on your dev machine.
 
-## What you still need running locally
+## What you still need running
 
-| Daemon | Purpose | Status |
-|--------|---------|--------|
-| **dev-bridge** | Executes repo fixes after you approve | Must run on dev PC 24/7 |
-| **home-bridge** | Spins up web-agent SSH tunnel (`web_agent_tunnel`) | Optional but needed for viewer auto-start |
+| Daemon | Where | Purpose |
+|--------|-------|---------|
+| **dev-bridge** | **VPS** (recommended) | Executes repo fixes after Telegram approve — 24/7 |
+| **home-bridge** | Dev PC | Spins up web-agent SSH tunnel (`web_agent_tunnel`) |
 
-### Install dev-bridge (one command)
+### Install dev-bridge on VPS (no dev PC required)
 
-From your `n8n-ultimate-assistant` repo:
+SSH to your VPS, then:
+
+```bash
+cd /opt/n8n-ultimate-assistant
+sudo bash scripts/install-dev-bridge-vps.sh
+journalctl -u vps-dev-bridge -f
+```
+
+Requires `HOME_BRIDGE_TOKEN` and `DEVBRIDGE_HMAC_SECRET` in `/opt/n8n/.env`.
+
+### Dev PC install (optional fallback)
+
+Only if you want fixes on a **local** repo clone instead of VPS:
 
 ```bash
 bash scripts/install-dev-bridge.sh
 ```
-
-This creates `~/.dev-bridge/`, seeds `.env` (copies bearer from `~/.assistant-bridge/.env` if present), and starts the **systemd user service**.
-
-If `DEV_BRIDGE_HMAC_SECRET` is empty, paste VPS env `DEVBRIDGE_HMAC_SECRET` into `~/.dev-bridge/.env`, then:
-
-```bash
-systemctl --user restart dev-bridge
-```
-
-**Debug in tmux:** `bash scripts/dev-bridge-tmux.sh` then `tmux attach -t dev-bridge`
 
 Full details: `n8n-ultimate-assistant/dev-bridge/README.md`
 
