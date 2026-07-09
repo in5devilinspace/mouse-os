@@ -32,7 +32,25 @@ Tell Onyx:
 | **dev-bridge** | Executes repo fixes after you approve | Must run on dev PC 24/7 |
 | **home-bridge** | Spins up web-agent SSH tunnel (`web_agent_tunnel`) | Optional but needed for viewer auto-start |
 
-See `n8n-ultimate-assistant/dev-bridge/README.md` for setup.
+### Install dev-bridge (one command)
+
+From your `n8n-ultimate-assistant` repo:
+
+```bash
+bash scripts/install-dev-bridge.sh
+```
+
+This creates `~/.dev-bridge/`, seeds `.env` (copies bearer from `~/.assistant-bridge/.env` if present), and starts the **systemd user service**.
+
+If `DEV_BRIDGE_HMAC_SECRET` is empty, paste VPS env `DEVBRIDGE_HMAC_SECRET` into `~/.dev-bridge/.env`, then:
+
+```bash
+systemctl --user restart dev-bridge
+```
+
+**Debug in tmux:** `bash scripts/dev-bridge-tmux.sh` then `tmux attach -t dev-bridge`
+
+Full details: `n8n-ultimate-assistant/dev-bridge/README.md`
 
 ## Cash App card / physical mail
 
