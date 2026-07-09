@@ -86,7 +86,7 @@ command = "xdg-open http://localhost:1984/stream.html?src=cam1&src=cam2&src=cam3
 
 ## Roadmap
 
-**v1.1** ① hot interrupt grammar during TTS ② taskbar indicator with hard mute + "heard you" light ③ GNOME window-lookup extension + "which one?" disambiguation. **v2** speech-to-speech persona · eye-tracking (gaze moves, voice clicks) · web-agent errands · ghost cursor.
+**v1.1** ① hot interrupt grammar during TTS ② taskbar indicator with hard mute + "heard you" light ③ GNOME window-lookup extension + "which one?" disambiguation. **v2** speech-to-speech persona · eye-tracking (gaze moves, voice clicks) · ghost cursor.
 
 ## Development
 
